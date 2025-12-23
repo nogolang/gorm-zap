@@ -1,4 +1,4 @@
-module github.com/nogolang/gorm-utils
+module github.com/nogolang/gorm-zap
 
 go 1.25.1
 
