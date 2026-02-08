@@ -109,5 +109,6 @@ func (receiver GormZap) Trace(ctx context.Context, begin time.Time, fc func() (s
 func trimSymbol(sql string) string {
 	sql = strings.ReplaceAll(sql, "\r", "")
 	sql = strings.ReplaceAll(sql, "\n", "")
+	sql = strings.ReplaceAll(sql, "\t", "")
 	return sql
 }
