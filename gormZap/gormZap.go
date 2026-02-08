@@ -2,6 +2,7 @@ package gormZap
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -77,7 +78,7 @@ func (receiver GormZap) Trace(ctx context.Context, begin time.Time, fc func() (s
 	case err != nil:
 		sql, rowsAffected := fc()
 		fields := []zapcore.Field{
-			zap.String("sql", sql),
+			zap.String("sql", trimSymbol(sql)),
 			zap.Int64("rowsAffected", rowsAffected),
 			zap.Duration("latency", latency),
 			zap.Error(err),
@@ -89,7 +90,7 @@ func (receiver GormZap) Trace(ctx context.Context, begin time.Time, fc func() (s
 	case receiver.LogLevel >= gormlogger.Info && receiver.SlowThreshold > latency:
 		sql, rowsAffected := fc()
 		fields := []zapcore.Field{
-			zap.String("sql", sql),
+			zap.String("sql", trimSymbol(sql)),
 			zap.Int64("rowsAffected", rowsAffected),
 			zap.Duration("latency", latency),
 		}
@@ -98,11 +99,15 @@ func (receiver GormZap) Trace(ctx context.Context, begin time.Time, fc func() (s
 	case receiver.LogLevel >= gormlogger.Warn && receiver.SlowThreshold <= latency:
 		sql, rowsAffected := fc()
 		fields := []zapcore.Field{
-			zap.String("sql", sql),
+			zap.String("sql", trimSymbol(sql)),
 			zap.Int64("rowsAffected", rowsAffected),
 			zap.Duration("latency", latency),
 		}
 		receiver.ZapLogger.Warn("slowSql", fields...)
 	}
-
+}
+func trimSymbol(sql string) string {
+	sql = strings.ReplaceAll(sql, "\r", "")
+	sql = strings.ReplaceAll(sql, "\n", "")
+	return sql
 }
